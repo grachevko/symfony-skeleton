@@ -7,7 +7,6 @@ vendor/
 var/*
 !var/cache/.gitkeep
 !var/logs/.gitkeep
-!var/logs/SymfonyRequirements.php
 
 # Assets and user uploads
 web/bundles/*
