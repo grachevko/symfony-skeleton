@@ -16,6 +16,19 @@ use Symfony\Component\HttpKernel\KernelEvents;
 final class ExceptionListener implements EventSubscriberInterface
 {
     /**
+     * @var string
+     */
+    private $environment;
+
+    /**
+     * @param string $environment
+     */
+    public function __construct($environment)
+    {
+        $this->environment = $environment;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function getSubscribedEvents()
@@ -30,6 +43,10 @@ final class ExceptionListener implements EventSubscriberInterface
      */
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
+        if ('dev' === $this->environment) {
+            return;
+        }
+        
         $exception = $event->getException();
 
         $statusCode = Response::HTTP_BAD_REQUEST;

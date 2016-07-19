@@ -16,5 +16,7 @@ services:
 
     app.event_listener.exception:
         class: AppBundle\EventListener\ExceptionListener
+        arguments:
+            - '%kernel.environment%'
         tags:
           - { name: kernel.event_subscriber }
