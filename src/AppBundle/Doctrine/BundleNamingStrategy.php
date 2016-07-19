@@ -13,6 +13,10 @@ class BundleNamingStrategy extends UnderscoreNamingStrategy
     {
         $underscored = parent::classToTableName($className);
 
+        if (0 === strpos($className, 'AppBundle')) {
+            return $underscored;
+        }
+
         if (strpos($className, 'Entity') && $pos = strpos($className, 'Bundle')) {
             $underscored = strtolower(substr($className, 0, $pos)).'_'.$underscored;
         }
