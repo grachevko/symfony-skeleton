@@ -2,7 +2,7 @@
 
 namespace AppBundle\EventListener;
 
-use AppBundle\Exception\ValidateException;
+use AppBundle\Exception\ValidatorException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,7 +36,7 @@ final class ExceptionListener implements EventSubscriberInterface
         $headers = [];
         $json = false;
 
-        if ($exception instanceof ValidateException) {
+        if ($exception instanceof ValidatorException) {
             $errors = [];
             foreach ($exception->getErrors() as $error) {
                 $errors[] = [

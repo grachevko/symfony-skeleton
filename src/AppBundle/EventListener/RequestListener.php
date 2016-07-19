@@ -2,7 +2,7 @@
 
 namespace AppBundle\EventListener;
 
-use AppBundle\Exception\ValidateException;
+use AppBundle\Exception\ValidatorException;
 use AppBundle\Request\Request;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -78,7 +78,7 @@ final class RequestListener implements EventSubscriberInterface
 
                 $errors = $this->validator->validate($requestObject);
                 if (count($errors)) {
-                    throw new ValidateException($errors);
+                    throw new ValidatorException($errors);
                 }
 
                 $request->attributes->set($parameter->getName(), $requestObject);

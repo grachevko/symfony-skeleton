@@ -7,7 +7,7 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 /**
  * @author Konstantin Grachev <ko@grachev.io>
  */
-final class ValidateException extends \RuntimeException
+final class ValidatorException extends \RuntimeException
 {
     /**
      * @var ConstraintViolationListInterface
