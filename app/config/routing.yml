@@ -1,0 +1,8 @@
+redirect_slash:
+    resource: "@AppBundle/Controller/RedirectingController.php"
+    type:     annotation
+
+api_v1:
+    resource: "@AppBundle/Controller/v1"
+    type:     annotation
+    prefix:   /v1

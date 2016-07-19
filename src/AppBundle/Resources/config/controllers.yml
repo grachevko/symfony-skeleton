@@ -1,0 +1,7 @@
+services:
+    app.controller:
+        class: AppBundle\Controller\Controller
+
+    app.controller.default:
+        class: AppBundle\Controller\v1\DefaultController
+        parent: app.controller

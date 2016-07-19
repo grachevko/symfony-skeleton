@@ -1,0 +1,19 @@
+services:
+    app.event_listener.request:
+        class: AppBundle\EventListener\RequestListener
+        arguments:
+          - '@validator'
+        tags:
+          - { name: kernel.event_subscriber }
+
+    app.event_listener.response:
+        class: AppBundle\EventListener\ResponseListener
+        arguments:
+            - '@serializer'
+        tags:
+          - { name: kernel.event_subscriber }
+
+    app.event_listener.exception:
+        class: AppBundle\EventListener\ExceptionListener
+        tags:
+          - { name: kernel.event_subscriber }

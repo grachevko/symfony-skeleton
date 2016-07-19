@@ -1,0 +1,77 @@
+compose:
+    database:
+        image: mariadb
+        environment:
+            MYSQL_DATABASE: db
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+
+build:
+    install:
+        image: composer/composer:alpine
+        pull: true
+        volumes:
+            - /var/lib/composer:/var/lib/composer
+        commands:
+            - composer install --no-dev --no-scripts --no-interaction --optimize-autoloader --ignore-platform-reqs --quiet
+        environment:
+            COMPOSER_CACHE_DIR: /var/lib/composer
+    build:
+        image: docker
+        pull: true
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+        commands:
+          - docker build -t ${IMAGE} --quiet .
+        environment:
+            IMAGE: $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER
+    test:
+        image: $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER
+        pull: false
+        volumes:
+            - /var/lib/composer:/var/lib/composer
+        commands:
+            - composer install --no-scripts --optimize-autoloader --no-interaction --quiet
+            - composer run-script build-parameters --no-interaction --quiet
+            - bin/symfony_requirements > /dev/null
+            - while ! nc -z 127.0.0.1 3306; do sleep 1; done
+            - composer run-script post-install-cmd --no-interaction --quiet
+            - bin/console doctrine:migration:migrate --no-interaction --quiet
+            - bin/console doctrine:fixtures:load --no-interaction --quiet
+            - phpunit
+        environment:
+            COMPOSER_CACHE_DIR: /var/lib/composer
+            SYMFONY_ENV: test
+    push:
+        image: docker
+        pull: false
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        commands:
+            - docker login --username ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
+            - docker push ${IMAGE} > /dev/null
+            - docker rmi --force ${IMAGE} > /dev/null
+        environment:
+            IMAGE: $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER
+            REGISTRY_HOST: $$REGISTRY_HOST
+            REGISTRY_USERNAME: $$REGISTRY_USERNAME
+            REGISTRY_PASSWORD: $$REGISTRY_PASSWORD
+        when:
+            success: true
+
+deploy:
+    rancher:
+        url: $$RANCHER_URL
+        access_key: $$RANCHER_ACCESS_KEY
+        secret_key: $$RANCHER_SECRET_KEY
+        service: api/php
+        confirm: true
+        start_first: true
+        docker_image: $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER
+        timeout: 60
+        when:
+            branch: master
+
+cache:
+    mount:
+      - .git
+      - vendor

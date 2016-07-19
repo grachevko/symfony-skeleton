@@ -1,0 +1,8 @@
+var/cache/*
+var/logs/*
+var/sessions/*
+var/bootstrap.php.cache
+
+Dockerfile
+Dockerfile_dev
+app/config/parameters.yml

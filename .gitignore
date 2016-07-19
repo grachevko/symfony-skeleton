@@ -1,0 +1,17 @@
+!.gitkeep
+
+# Composer
+vendor/
+
+# Cache and logs (Symfony3)
+var/*
+!var/cache/.gitkeep
+!var/logs/.gitkeep
+!var/logs/SymfonyRequirements.php
+
+# Assets and user uploads
+web/bundles/*
+!web/bundles/.gitkeep
+
+# Symfony parameters
+app/config/parameters.yml
