@@ -2,6 +2,7 @@ imports:
     - { resource: controllers.yml }
     - { resource: listeners.yml }
     - { resource: normalizers.yml }
+    - { resource: requests.yml }
 
 services:
     app.doctrine.bundle_naming_strategy:

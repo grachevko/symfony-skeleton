@@ -11,23 +11,15 @@ use AppBundle\Traits\PropertyGetterTrait;
 abstract class Request
 {
     use PropertyGetterTrait;
-    use PropertyAssignTrait {
-        __construct as __parentConstructor;
-    }
+    use PropertyAssignTrait;
 
     protected static $defaults = [];
 
     /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @param Symfony\Component\HttpFoundation\Request $request
      */
-    public function __construct(\Symfony\Component\HttpFoundation\Request $request)
+    public function handleRequest(Symfony\Component\HttpFoundation\Request $request)
     {
-        $parameters = $request->query->all();
-
-        if (static::$defaults) {
-            $parameters = array_merge(static::$defaults, $parameters);
-        }
-
-        $this->__parentConstructor($parameters);
+        $this->assign(array_merge(static::$defaults, $request->query->all()));
     }
 }

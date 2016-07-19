@@ -1,0 +1,5 @@
+services:
+    app.factory.request:
+        class: AppBundle\Factory\RequestFactory
+        arguments:
+            - '@service_container'

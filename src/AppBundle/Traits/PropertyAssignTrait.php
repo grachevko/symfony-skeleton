@@ -10,14 +10,6 @@ trait PropertyAssignTrait
     /**
      * @param array $parameters
      */
-    public function __construct(array $parameters)
-    {
-        $this->assign($parameters);
-    }
-
-    /**
-     * @param array $parameters
-     */
     protected function assign(array $parameters)
     {
         foreach ($parameters as $property => $value) {

@@ -3,6 +3,7 @@
 namespace AppBundle\EventListener;
 
 use AppBundle\Exception\ValidatorException;
+use AppBundle\Factory\RequestFactory;
 use AppBundle\Request\Request;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -31,11 +32,17 @@ final class RequestListener implements EventSubscriberInterface
     private $validator;
 
     /**
+     * @var RequestFactory
+     */
+    private $requestFactory;
+
+    /**
      * @param ValidatorInterface $validator
      */
-    public function __construct(ValidatorInterface $validator)
+    public function __construct(ValidatorInterface $validator, RequestFactory $requestFactory)
     {
         $this->validator = $validator;
+        $this->requestFactory = $requestFactory;
     }
 
     /**
@@ -74,7 +81,9 @@ final class RequestListener implements EventSubscriberInterface
 
         foreach ($method->getParameters() as $parameter) {
             if (is_subclass_of($requestClass = (string) $parameter->getType(), Request::class, true)) {
-                $requestObject = new $requestClass($request);
+                /** @var Request $requestObject */
+                $requestObject = $this->requestFactory->create($requestClass);
+                $requestObject->handleRequest($request);
 
                 $errors = $this->validator->validate($requestObject);
                 if (count($errors)) {

@@ -3,6 +3,7 @@ services:
         class: AppBundle\EventListener\RequestListener
         arguments:
           - '@validator'
+          - '@app.factory.request'
         tags:
           - { name: kernel.event_subscriber }
 
