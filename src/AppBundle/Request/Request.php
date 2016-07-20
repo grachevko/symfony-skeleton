@@ -16,9 +16,9 @@ abstract class Request
     protected static $defaults = [];
 
     /**
-     * @param Symfony\Component\HttpFoundation\Request $request
+     * @param \Symfony\Component\HttpFoundation\Request $request
      */
-    public function handleRequest(Symfony\Component\HttpFoundation\Request $request)
+    public function handleRequest(\Symfony\Component\HttpFoundation\Request $request)
     {
         $this->assign(array_merge(static::$defaults, $request->query->all()));
     }
