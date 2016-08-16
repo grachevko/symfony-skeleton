@@ -2,6 +2,7 @@
 
 namespace AppBundle\Request;
 
+use AppBundle\Model\Model;
 use AppBundle\Traits\PropertyAssignTrait;
 use AppBundle\Traits\PropertyGetterTrait;
 
@@ -16,7 +17,7 @@ abstract class Request
     protected static $defaults = [];
 
     /**
-     * @var
+     * @var Model
      */
     protected $model;
 
@@ -24,6 +25,11 @@ abstract class Request
      * @var
      */
     protected $files;
+
+    /**
+     * @return string
+     */
+    abstract protected function getModelClass(): string;
 
     /**
      * @param array $query
@@ -48,7 +54,9 @@ abstract class Request
      */
     protected function setModel(array $request)
     {
-        throw new \DomainException('Method must be overwritten');
+        $class = $this->getModelClass();
+
+        $this->model = $class ? new $class($request) : $request;
     }
 
     /**
