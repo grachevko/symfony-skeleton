@@ -3,8 +3,10 @@
 namespace AppBundle\Controller\v1;
 
 use AppBundle\Controller\Controller;
+use AppBundle\Request\Request;
+use Ramsey\Uuid\UuidInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @Route(service="app.controller.default")
@@ -14,10 +16,42 @@ use Symfony\Component\HttpFoundation\Response;
 final class DefaultController extends Controller
 {
     /**
-     * @Route("/{url}")
+     * @Route(name="entity_list")
+     * @Method("GET")
      */
-    public function indexAction()
+    public function listAction(Request $request)
     {
-        return Response::HTTP_OK;
+    }
+
+    /**
+     * @Route("/{id}", name="entity_show")
+     * @Method("GET")
+     */
+    public function showAction(UuidInterface $id)
+    {
+    }
+
+    /**
+     * @Route(name="entity_create")
+     * @Method("POST")
+     */
+    public function createAction(Request $request)
+    {
+    }
+
+    /**
+     * @Route(name="entity_update")
+     * @Method("PATCH")
+     */
+    public function updateAction(Request $request)
+    {
+    }
+
+    /**
+     * @Route(name="entity_delete")
+     * @Method("DELETE")
+     */
+    public function deleteAction(Request $request)
+    {
     }
 }
