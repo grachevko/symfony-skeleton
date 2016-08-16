@@ -5,34 +5,21 @@ services:
       build:
           dockerfile: Dockerfile_dev
           context: .
-      ports:
-          - 80:80
+      hostname: service.local
       volumes:
           - ./:/usr/local/app
-          - /var/lib/composer:/var/lib/composer
-      environment:
-          COMPOSER_HOME: /var/lib/composer
       depends_on:
-          - mysql
-      networks:
-          - inner
+          - db
 
-  mysql:
+  db:
       image: mariadb
-      ports:
-          - 3306:3306
+      hostname: db.service.local
       volumes:
           - mysql-db:/var/lib/mysql
       environment:
           MYSQL_DATABASE: db
           MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
-      networks:
-          - inner
 
 volumes:
   mysql-db:
     driver: local
-
-networks:
-  inner:
-    driver: bridge

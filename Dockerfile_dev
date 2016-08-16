@@ -3,39 +3,34 @@ FROM php:fpm-alpine
 MAINTAINER Konstantin Grachev <ko@grachev.io>
 
 ENV APP_DIR /usr/local/app
+
+ENV COMPOSER_BIN_DIR /usr/local/bin
+ENV COMPOSER_CACHE_DIR /var/cache/composer
+ENV COMPOSER_ALLOW_SUPERUSER 1
+
 ENV PATH ${APP_DIR}/bin:${PATH}
 
 WORKDIR ${APP_DIR}
 
 RUN set -ex \
-    && apk --update add \
+    && apk --no-cache add \
         icu-dev \
-        git \
-        openssh-client \
-        tzdata \
         zlib-dev \
-    && docker-php-ext-install zip intl pdo_mysql iconv mbstring opcache \
+    && docker-php-ext-install zip intl pdo_mysql iconv opcache \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && curl -L -o /usr/local/bin/phpunit https://phar.phpunit.de/phpunit.phar \
-    && chmod +x /usr/local/bin/phpunit
+    && composer global require phpunit/phpunit
 
-RUN apk add --update --no-cache --virtual .build-deps $PHPIZE_DEPS \
+RUN apk add --no-cache --virtual .build-deps git openssh-client mysql-client $PHPIZE_DEPS \
     && pecl install xdebug \
     && echo 'zend_extension=xdebug.so' > /usr/local/etc/php/conf.d/xdebug.conf \
-    && rm -rf .build-deps \
-    && apk --update add bash mysql-client
-
-RUN set -ex \
-    && cp /usr/src/php/php.ini-development $PHP_INI_DIR/php.ini \
-    && { \
-        echo 'date.timezone = Europe/Moscow'; \
-    } >> ${PHP_INI_DIR}/php.ini \
     && { \
         echo 'xdebug.remote_enable=On'; \
         echo 'xdebug.remote_autostart=On'; \
         echo 'xdebug.remote_connect_back=On'; \
-    } >> ${PHP_INI_DIR}/php.ini \
-    && sed -i '/umask/c\umask 0000' /etc/profile \
+    } >> ${PHP_INI_DIR}/conf.d/xdebug.ini \
+    && apk del .build-deps
+
+RUN set -ex \
     && { \
         echo '#!/bin/sh'; \
         echo 'set -e'; \

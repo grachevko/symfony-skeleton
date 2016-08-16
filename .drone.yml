@@ -1,5 +1,5 @@
 compose:
-    database:
+    db:
         image: mariadb
         environment:
             MYSQL_DATABASE: db
@@ -10,11 +10,11 @@ build:
         image: composer/composer:alpine
         pull: true
         volumes:
-            - /var/lib/composer:/var/lib/composer
+            - /var/cache/composer:/var/cache/composer
         commands:
             - composer install --no-dev --no-scripts --no-interaction --optimize-autoloader --ignore-platform-reqs --quiet
         environment:
-            COMPOSER_CACHE_DIR: /var/lib/composer
+            COMPOSER_CACHE_DIR: /var/cache/composer
     build:
         image: docker
         pull: true
@@ -28,7 +28,7 @@ build:
         image: $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER
         pull: false
         volumes:
-            - /var/lib/composer:/var/lib/composer
+            - /var/cache/composer:/var/cache/composer
         commands:
             - composer install --no-scripts --optimize-autoloader --no-interaction --quiet
             - composer run-script build-parameters --no-interaction --quiet
@@ -39,7 +39,7 @@ build:
             - bin/console doctrine:fixtures:load --no-interaction --quiet
             - phpunit
         environment:
-            COMPOSER_CACHE_DIR: /var/lib/composer
+            COMPOSER_CACHE_DIR: /var/cache/composer
             SYMFONY_ENV: test
     push:
         image: docker

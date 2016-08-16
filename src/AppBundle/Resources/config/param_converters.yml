@@ -1,0 +1,13 @@
+services:
+    app.param_converter.uuid:
+        class: AppBundle\Request\ParamConverter\UuidConverter
+        tags:
+            - { name: request.param_converter }
+
+    app.param_converter.request:
+        class: AppBundle\Request\ParamConverter\RequestConverter
+        arguments:
+            - '@app.factory.request'
+            - '@validator'
+        tags:
+            - { name: request.param_converter }

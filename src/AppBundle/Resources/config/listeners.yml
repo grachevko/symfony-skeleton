@@ -1,12 +1,4 @@
 services:
-    app.event_listener.request:
-        class: AppBundle\EventListener\RequestListener
-        arguments:
-          - '@validator'
-          - '@app.factory.request'
-        tags:
-          - { name: kernel.event_subscriber }
-
     app.event_listener.response:
         class: AppBundle\EventListener\ResponseListener
         arguments:

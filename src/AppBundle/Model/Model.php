@@ -12,4 +12,12 @@ abstract class Model
 {
     use PropertyAssignTrait;
     use PropertyGetterTrait;
+
+    /**
+     * @param array $parameters
+     */
+    public function __construct(array $parameters)
+    {
+        $this->assign($parameters);
+    }
 }

@@ -6,9 +6,7 @@ use AppBundle\Traits\PropertyAssignTrait;
 use AppBundle\Traits\PropertyGetterTrait;
 
 /**
- * @property \Symfony\Component\HttpFoundation\Request $request
- *
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 abstract class Request
 {
@@ -18,17 +16,46 @@ abstract class Request
     protected static $defaults = [];
 
     /**
-     * @var \Symfony\Component\HttpFoundation\Request
+     * @var
      */
-    protected $request;
+    protected $model;
 
     /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @var
      */
-    public function handleRequest(\Symfony\Component\HttpFoundation\Request $request)
-    {
-        $this->request = $request;
+    protected $files;
 
-        $this->assign(array_merge(static::$defaults, $request->query->all()));
+    /**
+     * @param array $query
+     * @param array $request
+     * @param array $files
+     */
+    public function __construct(array $query, array $request = [], array $files = [])
+    {
+        $this->assign(array_merge(static::$defaults, $query));
+
+        if ($request) {
+            $this->setModel($request);
+        }
+
+        if ($files) {
+            $this->setFiles($files);
+        }
+    }
+
+    /**
+     * @param array $request
+     */
+    protected function setModel(array $request)
+    {
+        throw new \DomainException('Method must be overwritten');
+    }
+
+    /**
+     * @param array $files
+     */
+    protected function setFiles(array $files)
+    {
+        $this->files = $files;
     }
 }

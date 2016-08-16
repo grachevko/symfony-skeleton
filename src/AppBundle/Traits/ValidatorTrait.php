@@ -8,9 +8,20 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 /**
  * @author Konstantin Grachev <ko@grachev.io>
  */
-trait ValidatorThrowableTrait
+trait ValidatorTrait
 {
-    use ValidatorAwareTrait;
+    /**
+     * @var ValidatorInterface
+     */
+    protected $validator;
+
+    /**
+     * @param ValidatorInterface $validator
+     */
+    public function setValidator(ValidatorInterface $validator)
+    {
+        $this->validator = $validator;
+    }
 
     /**
      * @param $value
@@ -19,7 +30,7 @@ trait ValidatorThrowableTrait
      *
      * @throws ValidatorException
      */
-    public function validateThenThrow($value, $constraints = null, $groups = null)
+    protected function validateThenThrow($value, $constraints = null, $groups = null)
     {
         if (!$this->validator instanceof ValidatorInterface) {
             throw new \RuntimeException('Is need to set Validator first');
