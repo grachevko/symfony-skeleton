@@ -45,22 +45,21 @@ class ResponseListener implements EventSubscriberInterface
     {
         $result = $event->getControllerResult();
 
-        $data = '';
+        if (!$result) {
+            return;
+        }
+
+        $data = null;
         $statusCode = Response::HTTP_OK;
         $headers = [];
         $json = false;
-
         if ($result instanceof UuidInterface) {
             $data = ['id' => (string) $result];
             $statusCode = Response::HTTP_CREATED;
-        } elseif (is_object($result)) {
-            $data = $this->serializer->normalize($result);
-        } elseif (is_array($result)) {
-            $data = $result;
         } elseif (is_numeric($result)) {
             $statusCode = $result;
         } else {
-            throw new \DomainException('Can\'t convert controller result to Response');
+            $data = $result;
         }
 
         $event->setResponse(new JsonResponse($data, $statusCode, $headers, $json));
