@@ -14,6 +14,7 @@ WORKDIR ${APP_DIR}
 
 RUN set -ex \
     && apk --no-cache add \
+        git \
         icu-dev \
         zlib-dev \
     && docker-php-ext-install zip intl pdo_mysql iconv opcache \
