@@ -5,7 +5,7 @@ namespace AppBundle\Monolog;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 final class UuidProcessor
 {

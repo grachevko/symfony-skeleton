@@ -6,7 +6,7 @@ use AppBundle\Traits\PropertyAssignTrait;
 use AppBundle\Traits\PropertyGetterTrait;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 abstract class Model
 {

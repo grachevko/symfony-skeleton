@@ -5,7 +5,7 @@ namespace AppBundle\Doctrine;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 class BundleNamingStrategy extends UnderscoreNamingStrategy
 {

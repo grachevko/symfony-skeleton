@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @property int $pageSize
  * @property int $pageIndex
  *
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 trait PropertyPageTrait
 {

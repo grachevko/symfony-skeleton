@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Serializer\Serializer;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 class ResponseListener implements EventSubscriberInterface
 {
@@ -53,13 +53,16 @@ class ResponseListener implements EventSubscriberInterface
         $statusCode = Response::HTTP_OK;
         $headers = [];
         $json = false;
+
         if ($result instanceof UuidInterface) {
             $data = ['id' => (string) $result];
             $statusCode = Response::HTTP_CREATED;
         } elseif (is_numeric($result)) {
             $statusCode = $result;
-        } else {
+        } elseif (is_string($result)) {
             $data = $result;
+        } else {
+            $data = $this->serializer->normalize($result);
         }
 
         $event->setResponse(new JsonResponse($data, $statusCode, $headers, $json));

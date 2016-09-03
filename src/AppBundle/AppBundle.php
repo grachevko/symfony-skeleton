@@ -5,7 +5,7 @@ namespace AppBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 class AppBundle extends Bundle
 {

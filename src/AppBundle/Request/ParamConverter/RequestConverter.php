@@ -2,7 +2,7 @@
 
 namespace AppBundle\Request\ParamConverter;
 
-use AppBundle\Factory\RequestFactory;
+use AppBundle\Request\RequestFactory;
 use AppBundle\Traits\ValidatorTrait;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterInterface;
@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 final class RequestConverter implements ParamConverterInterface
 {

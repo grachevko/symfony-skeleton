@@ -3,12 +3,11 @@
 namespace AppBundle\Doctrine;
 
 use AppBundle\Exception\InvalidArgumentException;
-use AppBundle\Traits\Aware\EntityManagerTrait;
 use Doctrine\ORM\EntityNotFoundException;
 use Ramsey\Uuid\UuidInterface;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 abstract class EntityRepository
 {

@@ -1,3 +1,0 @@
-services:
-    app.factory.request:
-        class: AppBundle\Factory\RequestFactory

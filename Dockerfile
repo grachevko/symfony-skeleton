@@ -1,25 +1,34 @@
 FROM php:fpm-alpine
 
-MAINTAINER Konstantin Grachev <ko@grachev.io>
+MAINTAINER Konstantin Grachev <me@grachevko.ru>
 
-ENV APP_DIR /usr/local/app
+ENV APP_DIR=/usr/local/app \
+  COMPOSER_BIN_DIR=/usr/local/bin \
+  COMPOSER_CACHE_DIR=/var/cache/composer \
+  COMPOSER_ALLOW_SUPERUSER=1
 
-ENV COMPOSER_BIN_DIR /usr/local/bin
-ENV COMPOSER_CACHE_DIR /var/cache/composer
-ENV COMPOSER_ALLOW_SUPERUSER 1
-
-ENV PATH ${APP_DIR}/bin:${PATH}
+ENV PATH=${APP_DIR}/bin:${PATH}
 
 WORKDIR ${APP_DIR}
 
 RUN set -ex \
-    && apk --no-cache add \
+    && apk add --no-cache \
         git \
         icu-dev \
         zlib-dev \
     && docker-php-ext-install zip intl pdo_mysql iconv opcache \
+    && rm -rf /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && composer global require phpunit/phpunit
+    && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS && pecl install xdebug && apk del .build-deps
+
+ARG SOURCE_DIR=.
+
+COPY $SOURCE_DIR/composer.* ${APP_DIR}/
+RUN if [ -f composer.lock ]; then \
+    composer install --no-scripts --no-interaction --no-autoloader --no-progress --prefer-dist \
+    && rm -rf ${COMPOSER_CACHE_DIR}/* ; fi
+
+COPY $SOURCE_DIR/ ${APP_DIR}/
 
 RUN set -ex \
     && { \
@@ -35,23 +44,19 @@ RUN set -ex \
         echo ';opcache.revalidate_path = 0'; \
         echo 'opcache.save_comments = 1'; \
         echo 'opcache.load_comments = 1'; \
-    } > $PHP_INI_DIR/conf.d/opcache.ini
-
-COPY ./ ${APP_DIR}
-
-RUN set -ex \
-    && chmod -R 644 ${APP_DIR} \
-    && find ${APP_DIR} -type d -exec chmod 755 {} \; \
-    && chmod +x -R $APP_DIR/bin/* \
+    } > $PHP_INI_DIR/conf.d/opcache.ini \
     && { \
-        echo '#!/bin/sh'; \
-        echo 'set -ex'; \
-        echo 'composer run-script post-install-cmd --no-interaction --quiet'; \
-        echo 'console doctrine:migrations:migrate --no-interaction --allow-no-migration'; \
-        echo 'chmod -R 777 $APP_DIR/var'; \
-        echo 'exec "$@"'; \
-    } > /usr/local/bin/docker-entrypoint.sh \
-    && chmod +x /usr/local/bin/docker-entrypoint.sh
+        echo 'xdebug.remote_enable=On'; \
+        echo 'xdebug.remote_autostart=On'; \
+        echo 'xdebug.remote_connect_back=On'; \
+    } >> ${PHP_INI_DIR}/conf.d/xdebug.ini \
+    && { \
+        echo 'date.timezone = UTC'; \
+        echo 'short_open_tag = off'; \
+    } > ${PHP_INI_DIR}/php.ini
+
+VOLUME ${APP_DIR}/var/logs
+VOLUME ${APP_DIR}/var/sessions
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["php-fpm"]
+CMD []

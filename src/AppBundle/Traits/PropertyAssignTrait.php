@@ -3,7 +3,7 @@
 namespace AppBundle\Traits;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 trait PropertyAssignTrait
 {

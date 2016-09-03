@@ -3,7 +3,7 @@
 namespace AppBundle\Exception;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 final class InvalidArgumentException extends \InvalidArgumentException
 {

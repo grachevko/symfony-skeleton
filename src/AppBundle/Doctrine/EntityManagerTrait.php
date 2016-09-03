@@ -1,11 +1,11 @@
 <?php
 
-namespace AppBundle\Traits\Aware;
+namespace AppBundle\Doctrine;
 
 use Doctrine\ORM\EntityManager;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 trait EntityManagerTrait
 {

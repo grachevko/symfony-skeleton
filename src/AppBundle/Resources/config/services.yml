@@ -1,6 +1,1 @@
-imports:
-    - { resource: controllers.yml }
-    - { resource: listeners.yml }
-    - { resource: normalizers.yml }
-    - { resource: factories.yml }
-    - { resource: param_converters.yml }
+services:

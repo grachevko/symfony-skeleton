@@ -3,10 +3,14 @@
 # Composer
 vendor/
 
-# Cache and logs (Symfony3)
-var/*
+# Cache and logs (Symfony)
+/var/bootstrap.php.cache
+/var/cache
 !var/cache/.gitkeep
+!var/cache/composer.null
+/var/logs
 !var/logs/.gitkeep
+/var/SymfonyRequirements.php
 
 # Assets and user uploads
 web/bundles/*
@@ -14,3 +18,9 @@ web/bundles/*
 
 # Symfony parameters
 app/config/parameters.yml
+
+# Docker compose
+/docker-compose.yml
+
+# Drone secret valiables
+/.drone.sec.yml

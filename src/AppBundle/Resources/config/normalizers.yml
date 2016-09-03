@@ -4,11 +4,6 @@ services:
         tags:
             - { name: serializer.normalizer }
 
-    app.serializer_normalizer.create_view:
-        class: AppBundle\Serializer\Normalizer\CreateViewNormalizer
-        tags:
-            - { name: serializer.normalizer }
-
     app.serializer_normalizer.to_array:
         class: AppBundle\Serializer\Normalizer\ToArrayNormalizer
         tags:

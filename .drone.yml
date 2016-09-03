@@ -1,77 +1,68 @@
-compose:
-    db:
-        image: mariadb
-        environment:
-            MYSQL_DATABASE: db
-            MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+clone:
+  depth: 1
 
 build:
-    install:
-        image: composer/composer:alpine
-        pull: true
-        volumes:
-            - /var/cache/composer:/var/cache/composer
-        commands:
-            - composer install --no-dev --no-scripts --no-interaction --optimize-autoloader --ignore-platform-reqs --quiet
-        environment:
-            COMPOSER_CACHE_DIR: /var/cache/composer
-    build:
-        image: docker
-        pull: true
-        volumes:
-          - /var/run/docker.sock:/var/run/docker.sock
-        commands:
-          - docker build -t ${IMAGE} --quiet .
-        environment:
-            IMAGE: $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER
-    test:
-        image: $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER
-        pull: false
-        volumes:
-            - /var/cache/composer:/var/cache/composer
-        commands:
-            - composer install --no-scripts --optimize-autoloader --no-interaction --quiet
-            - composer run-script build-parameters --no-interaction --quiet
-            - bin/symfony_requirements > /dev/null
-            - while ! nc -z 127.0.0.1 3306; do sleep 1; done
-            - composer run-script post-install-cmd --no-interaction --quiet
-            - bin/console doctrine:migration:migrate --no-interaction --quiet
-            - bin/console doctrine:fixtures:load --no-interaction --quiet
-            - phpunit
-        environment:
-            COMPOSER_CACHE_DIR: /var/cache/composer
-            SYMFONY_ENV: test
-    push:
-        image: docker
-        pull: false
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-        commands:
-            - docker login --username ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
-            - docker push ${IMAGE} > /dev/null
-            - docker rmi --force ${IMAGE} > /dev/null
-        environment:
-            IMAGE: $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER
-            REGISTRY_HOST: $$REGISTRY_HOST
-            REGISTRY_USERNAME: $$REGISTRY_USERNAME
-            REGISTRY_PASSWORD: $$REGISTRY_PASSWORD
-        when:
-            success: true
+    image: docker
+    pull: false
+    docker:
+      tty: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    commands:
+        - docker build -t ${IMAGE}:$$BUILD_NUMBER .
+        - docker network create ${NETWORK}
+        - >-
+          docker run -d --name ${MYSQL_HOST} --network ${NETWORK}
+          -e MYSQL_DATABASE=${MYSQL_DB}
+          -e MYSQL_USER=${MYSQL_USER}
+          -e MYSQL_PASSWORD=${MYSQL_PASSWORD}
+          -e MYSQL_RANDOM_ROOT_PASSWORD='true'
+          mariadb
+        - docker run --rm --network ${NETWORK} alpine sh -c "while ! nc -z ${MYSQL_HOST} 3306; do sleep 1; done"
+        - >-
+          (docker run --rm --network ${NETWORK}
+          -e SYMFONY_ENV=test
+          -e database_host=${MYSQL_HOST}
+          -e database_user=${MYSQL_USER}
+          -e database_password=${MYSQL_PASSWORD}
+          ${IMAGE}:$$BUILD_NUMBER); local result=$?;
+        - docker rm -f ${MYSQL_HOST}
+        - docker network rm ${NETWORK}
+        - >+
+          if [ "$result" == 0 ]; then
+            docker login --username ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
+            docker push ${IMAGE}:$$BUILD_NUMBER > /dev/null
+            (docker rmi --force ${IMAGE}:$(($$BUILD_NUMBER-1)))
+          else
+            docker rmi --force ${IMAGE}:$$BUILD_NUMBER
+          fi
+        - exit "$result"
+    environment:
+        NETWORK: drone_network_$$BUILD_NUMBER
+        MYSQL_HOST: drone_mysql_$$BUILD_NUMBER
+        MYSQL_DB: db
+        MYSQL_USER: user
+        MYSQL_PASSWORD: password
+        IMAGE: $$REGISTRY_HOST/$$REGISTRY_REPO
+        REGISTRY_HOST: $$REGISTRY_HOST
+        REGISTRY_USERNAME: $$REGISTRY_USERNAME
+        REGISTRY_PASSWORD: $$REGISTRY_PASSWORD
 
 deploy:
     rancher:
         url: $$RANCHER_URL
         access_key: $$RANCHER_ACCESS_KEY
         secret_key: $$RANCHER_SECRET_KEY
-        service: api/php
+        service: $$RANCHER_STACK/$$RANCHER_SERVICE
         confirm: true
         start_first: true
         docker_image: $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER
-        timeout: 60
+        timeout: 120
         when:
             branch: master
 
-cache:
-    mount:
-      - .git
-      - vendor
+notify:
+    slack:
+        webhook_url: $$SLACK_WEBHOOK_URL
+        channel: drone
+        username: drone

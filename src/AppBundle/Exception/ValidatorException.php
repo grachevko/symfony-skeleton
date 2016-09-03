@@ -5,7 +5,7 @@ namespace AppBundle\Exception;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 final class ValidatorException extends \RuntimeException
 {

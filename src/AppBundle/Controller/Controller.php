@@ -3,7 +3,7 @@
 namespace AppBundle\Controller;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 abstract class Controller
 {

@@ -5,7 +5,7 @@ namespace AppBundle\Serializer\Normalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 final class ToArrayNormalizer implements NormalizerInterface
 {

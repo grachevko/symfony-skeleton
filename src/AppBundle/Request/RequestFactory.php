@@ -1,11 +1,11 @@
 <?php
 
-namespace AppBundle\Factory;
+namespace AppBundle\Request;
 
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @author Konstantin Grachev <ko@grachev.io>
+ * @author Konstantin Grachev <me@grachevko.ru>
  */
 final class RequestFactory
 {
@@ -13,7 +13,7 @@ final class RequestFactory
      * @param Request $request
      * @param $class
      *
-     * @return \AppBundle\Request\Request
+     * @return Request
      */
     public function create(Request $request, $class)
     {
