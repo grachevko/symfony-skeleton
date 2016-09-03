@@ -1,6 +1,6 @@
 {
-    "name": "automagistre/api",
-    "license": "proprietary",
+    "name": "grachevko/symfony-skeleton",
+    "license": "MIT",
     "type": "project",
     "autoload": {
         "psr-4": {
