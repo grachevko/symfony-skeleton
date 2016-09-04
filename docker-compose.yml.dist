@@ -7,8 +7,15 @@ services:
           args:
              SOURCE_DIR: ./var/null
       hostname: $SERVICE.local
+      command: bin/console server:run 0.0.0.0:80
       volumes:
           - ./:/usr/local/app
+      environment:
+          SYMFONY_ENV: dev
+          PHP_IDE_CONFIG: "serverName=$SERVICE"
+          database_host: mysql
+          database_user: db
+          database_password: db
       depends_on:
           - mysql
 
@@ -19,8 +26,9 @@ services:
           - mysql-db:/var/lib/mysql
       environment:
           MYSQL_DATABASE: db
+          MYSQL_USER: db
+          MYSQL_PASSWORD: db
           MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
-
 volumes:
   mysql-db:
     driver: local
