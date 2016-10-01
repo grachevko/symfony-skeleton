@@ -25,12 +25,6 @@ case ${i} in
     --no-composer)
     COMPOSER=false
     ;;
-    composer)
-    BUILD_PARAMS=false
-    COMPOSER=false
-    XDEBUG=false
-    COMMAND=${COMMAND}' '${i}
-    ;;
     -m|--migrations)
     MIGRATION=true
     ;;
@@ -61,8 +55,6 @@ done
 } > ${PHP_INI_DIR}/php.ini
 
 if [ "$SYMFONY_ENV" == "dev" ]; then
-    ln -sf ${APP_DIR}/bin/console /usr/local/bin/sf
-
     XDEBUG=${XDEBUG:=true}
     BUILD_PARAMS=${BUILD_PARAMS:=true}
     COMPOSER=${COMPOSER:="composer install --no-interaction --optimize-autoloader --prefer-source"}
@@ -150,8 +142,7 @@ fi
 
 if [ "$SYMFONY_ENV" == "prod" ]; then
     chown -R www-data:www-data ${APP_DIR}/var
-    cp -rfL  ${APP_DIR}/web/* ${NGINX_WEB_DIR}/
-    rm -rf ${NGINX_WEB_DIR}/*.php
+    rm -rf ${APP_DIR}/bin/sf ${APP_DIR}/web/config.php ${APP_DIR}/web/app_dev.php
 fi
 
 /bin/sh -c "${COMMAND}"
