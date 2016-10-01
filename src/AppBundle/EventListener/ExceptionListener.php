@@ -46,7 +46,7 @@ final class ExceptionListener implements EventSubscriberInterface
         if ('dev' === $this->environment) {
             return;
         }
-        
+
         $exception = $event->getException();
 
         $statusCode = Response::HTTP_BAD_REQUEST;

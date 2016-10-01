@@ -23,7 +23,7 @@ final class RequestConverter implements ParamConverterInterface
     private $requestFactory;
 
     /**
-     * @param RequestFactory $requestFactory
+     * @param RequestFactory     $requestFactory
      * @param ValidatorInterface $validator
      */
     public function __construct(RequestFactory $requestFactory, ValidatorInterface $validator)

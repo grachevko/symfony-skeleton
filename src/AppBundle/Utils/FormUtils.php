@@ -32,7 +32,6 @@ final class FormUtils
 
         foreach ($form->all() as $child) {
             /** @var FormInterface $child */
-
             if (!$child->isValid()) {
                 foreach (self::getErrorMessages($child, false) as $childName => $childErrors) {
                     $errors[$name.$childName] = $childErrors;
