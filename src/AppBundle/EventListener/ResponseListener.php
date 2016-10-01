@@ -49,10 +49,9 @@ class ResponseListener implements EventSubscriberInterface
             return;
         }
 
-        $data = null;
+        $data = '';
         $statusCode = Response::HTTP_OK;
         $headers = [];
-        $json = false;
 
         if ($result instanceof UuidInterface) {
             $data = ['id' => (string) $result];
@@ -65,6 +64,6 @@ class ResponseListener implements EventSubscriberInterface
             $data = $this->serializer->normalize($result);
         }
 
-        $event->setResponse(new JsonResponse($data, $statusCode, $headers, $json));
+        $event->setResponse(new JsonResponse($data, $statusCode, $headers));
     }
 }
