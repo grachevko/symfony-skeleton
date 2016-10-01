@@ -2,11 +2,12 @@
 
 namespace AppBundle\Request\ParamConverter;
 
+use AppBundle\Request\Request;
 use AppBundle\Request\RequestFactory;
 use AppBundle\Traits\ValidatorTrait;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -34,7 +35,7 @@ final class RequestConverter implements ParamConverterInterface
     /**
      * {@inheritdoc}
      */
-    public function apply(Request $request, ParamConverter $configuration)
+    public function apply(HttpFoundation\Request $request, ParamConverter $configuration)
     {
         $requestObject = $this->requestFactory->create($request, $configuration->getClass());
 
@@ -48,6 +49,6 @@ final class RequestConverter implements ParamConverterInterface
      */
     public function supports(ParamConverter $configuration)
     {
-        return is_subclass_of($configuration->getClass(), \AppBundle\Request\Request::class, true);
+        return is_subclass_of($configuration->getClass(), Request::class, true);
     }
 }
