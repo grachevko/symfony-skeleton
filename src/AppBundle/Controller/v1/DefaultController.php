@@ -2,7 +2,7 @@
 
 namespace AppBundle\Controller\v1;
 
-use AppBundle\Controller\Controller;
+use AppBundle\Controller\BaseController;
 use AppBundle\Request\Request;
 use Ramsey\Uuid\UuidInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -13,7 +13,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
  *
  * @author Konstantin Grachev <me@grachevko.ru>
  */
-final class DefaultController extends Controller
+final class DefaultController extends BaseController
 {
     /**
      * @Route(name="entity_list")
