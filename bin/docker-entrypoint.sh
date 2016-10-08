@@ -2,13 +2,9 @@
 
 set -e
 
-APP_DIR=${APP_DIR:=/usr/local/app}
 SYMFONY_ENV=${SYMFONY_ENV:=dev}
-NGINX_WEB_DIR=${NGINX_WEB_DIR:=/var/www}
-PHP_INI_DIR=${PHP_INI_DIR:=/usr/local/etc/php}
 
 OPCACHE=
-BUILD_PARAMS=
 COMPOSER=
 REQUIREMENTS=
 MIGRATION=
@@ -19,9 +15,6 @@ COMMAND=
 for i in "$@"
 do
 case ${i} in
-    --no-build-params)
-    BUILD_PARAMS=false
-    ;;
     --no-composer)
     COMPOSER=false
     ;;
@@ -56,7 +49,6 @@ done
 
 if [ "$SYMFONY_ENV" == "dev" ]; then
     XDEBUG=${XDEBUG:=true}
-    BUILD_PARAMS=${BUILD_PARAMS:=true}
     COMPOSER=${COMPOSER:="composer install --no-interaction --optimize-autoloader --prefer-source"}
 
     COMMAND=${COMMAND:='bin/console server:run 0.0.0.0:80'}
@@ -66,7 +58,6 @@ if [ "$SYMFONY_ENV" == "test" ]; then
     export SYMFONY_DEBUG=0
 
     OPCACHE=${OPCACHE:=true}
-    BUILD_PARAMS=${BUILD_PARAMS:=true}
     COMPOSER=${COMPOSER:="composer install --no-interaction --optimize-autoloader --no-progress --prefer-dist"}
     REQUIREMENTS=${REQUIREMENTS:=true}
     MIGRATION=${MIGRATION:=true}
@@ -103,10 +94,6 @@ if [ "$OPCACHE" == "true" ]; then
     } > ${PHP_INI_DIR}/conf.d/opcache.ini
 
     echo -e '\n > opcache enabled\n'
-fi
-
-if [ "$BUILD_PARAMS" == "true" ]; then
-    composer run-script build-parameters --no-interaction
 fi
 
 if [ "$COMPOSER" != "false" ]; then
