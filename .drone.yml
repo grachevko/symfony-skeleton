@@ -18,7 +18,7 @@ build:
           -e MYSQL_PASSWORD=${MYSQL_PASSWORD}
           -e MYSQL_RANDOM_ROOT_PASSWORD='true'
           mariadb
-        - docker run --rm --network ${NETWORK} alpine sh -c "while ! nc -z ${MYSQL_HOST} 3306; do sleep 1; done"
+        - docker run --rm --network ${NETWORK} docker sh -c "while ! nc -z ${MYSQL_HOST} 3306; do sleep 1; done"
         - >-
           (docker run --rm --network ${NETWORK}
           -e SYMFONY_ENV=test
