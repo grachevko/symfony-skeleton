@@ -41,8 +41,8 @@ build:
           fi
         - exit "$result"
     environment:
-        NETWORK: drone_network_$$BUILD_NUMBER
-        MYSQL_HOST: drone_mysql_$$BUILD_NUMBER
+        NETWORK: drone_network_$$REGISTRY_REPO_$$BUILD_NUMBER
+        MYSQL_HOST: drone_mysql_$$REGISTRY_REPO_$$BUILD_NUMBER
         MYSQL_DB: db
         MYSQL_USER: user
         MYSQL_PASSWORD: password
