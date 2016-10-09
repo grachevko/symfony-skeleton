@@ -13,9 +13,9 @@ services:
       environment:
           SYMFONY_ENV: dev
           PHP_IDE_CONFIG: "serverName=$SERVICE"
-          database_host: mysql
-          database_user: db
-          database_password: db
+          DATABASE_HOST: mysql
+          DATABASE_USER: db
+          DATABASE_PASSWORD: db
       depends_on:
           - mysql
 
