@@ -105,7 +105,7 @@ if [ "$REQUIREMENTS" == "true" ]; then
 fi
 
 if [ "$MIGRATION" == "true" ]; then
-    console doctrine:migrations:migrate --no-interaction --allow-no-migration
+    bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
 fi
 
 if [ "$FIXTURES" == "true" ]; then
