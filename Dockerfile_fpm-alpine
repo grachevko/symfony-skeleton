@@ -33,4 +33,3 @@ VOLUME ${APP_DIR}/var/logs
 VOLUME ${APP_DIR}/var/sessions
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD []
