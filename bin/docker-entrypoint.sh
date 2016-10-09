@@ -71,7 +71,8 @@ if [ "$SYMFONY_ENV" == "prod" ]; then
     COMPOSER=${COMPOSER:="composer install --no-dev --no-interaction --optimize-autoloader --no-progress --prefer-dist"}
     MIGRATION=${MIGRATION:=true}
 
-    COMMAND=${COMMAND:=php-fpm}
+#    COMMAND=${COMMAND:="php-fpm"}
+    COMMAND=${COMMAND:="apache2-foreground"}
 fi
 
 if [ "$OPCACHE" == "true" ]; then
