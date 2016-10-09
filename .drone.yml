@@ -32,7 +32,10 @@ build:
           if [ "$result" == 0 ]; then
             docker login --username ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
             docker push ${IMAGE}:$$BUILD_NUMBER > /dev/null
-            (docker rmi --force ${IMAGE}:$(($$BUILD_NUMBER-1)))
+            PREVIOUS_BUILD_NUMBER=$(($$BUILD_NUMBER-1));
+            if [ "$PREVIOUS_BUILD_NUMBER" -gt 0 ]; then
+              (docker rmi --force ${IMAGE}:${PREVIOUS_BUILD_NUMBER})
+            fi
           else
             docker rmi --force ${IMAGE}:$$BUILD_NUMBER
           fi
