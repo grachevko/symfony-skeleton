@@ -52,17 +52,16 @@ build:
         REGISTRY_PASSWORD: $$REGISTRY_PASSWORD
 
 deploy:
-    rancher:
-        url: $$RANCHER_URL
-        access_key: $$RANCHER_ACCESS_KEY
-        secret_key: $$RANCHER_SECRET_KEY
-        service: $$RANCHER_STACK/$$RANCHER_SERVICE
-        confirm: true
-        start_first: true
-        docker_image: $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER
-        timeout: 120
-        when:
-            branch: master
+    ssh:
+      host: $$SWARM_HOST
+      user: $$SWARM_USER
+      port: 22
+      commands:
+        - docker pull $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER
+        - docker service update --image $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER $$SWARM_SERVICE
+        - docker rmi `docker images -q --filter "before=$$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER" $$REGISTRY_HOST/$$REGISTRY_REPO` 2> /dev/null || true
+      when:
+          branch: master
 
 notify:
     slack:
