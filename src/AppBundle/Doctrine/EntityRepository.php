@@ -93,4 +93,22 @@ abstract class EntityRepository
             ->setMaxPerPage($pageSize)
             ->setCurrentPage($pageIndex);
     }
+
+    /**
+     * @param       $displayField
+     * @param array $orderBy
+     *
+     * @return array
+     */
+    public function findAllForChoices($displayField, array $orderBy = [])
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->select('e.id', 'e.'.$displayField);
+
+        foreach ($orderBy as $key => $value) {
+            $qb->addOrderBy('e.'.$key, $value);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

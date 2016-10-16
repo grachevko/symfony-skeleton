@@ -2,6 +2,7 @@
 
 namespace AppBundle\Utils;
 
+use Ramsey\Uuid\UuidInterface;
 use Symfony\Component\Form\FormInterface;
 
 /**
@@ -40,5 +41,27 @@ final class FormUtils
         }
 
         return $errors;
+    }
+
+    /**
+     * @param array  $array
+     * @param string $displayField
+     * @param string $valueField
+     *
+     * @return array
+     */
+    public static function arrayToChoices(array $array, string $displayField, string $valueField = 'id'): array
+    {
+        $result = [];
+        foreach ($array as $key => $item) {
+            $id = $item[$valueField];
+
+            $display = $item[$displayField];
+            $value = $id instanceof UuidInterface ? $id->toString() : $id;
+
+            $result[$display] = $value;
+        }
+
+        return $result;
     }
 }
