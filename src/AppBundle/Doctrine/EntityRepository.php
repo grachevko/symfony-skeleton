@@ -53,6 +53,8 @@ abstract class EntityRepository
 
     /**
      * @param $entity
+     *
+     * @throws InvalidArgumentException
      */
     public function save($entity)
     {
