@@ -1,67 +1,58 @@
-clone:
-  depth: 1
-
-build:
+pipeline:
+  build:
     image: docker
-    pull: false
-    docker:
-      tty: true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     commands:
-      - docker build -t ${IMAGE}:$$BUILD_NUMBER .
-      - docker network create ${NETWORK}
+      - docker build -t __IMAGE__:${DRONE_BUILD_NUMBER} .
+      - docker network create DRONE___PROJECT___${DRONE_BUILD_NUMBER}
       - >-
-        docker run -d --name ${MYSQL_HOST} --network ${NETWORK}
-        -e MYSQL_DATABASE=${MYSQL_DB}
-        -e MYSQL_USER=${MYSQL_USER}
-        -e MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        docker run -d --name DRONE___PROJECT___${DRONE_BUILD_NUMBER} --network DRONE___PROJECT___${DRONE_BUILD_NUMBER}
+        -e MYSQL_DATABASE="db"
+        -e MYSQL_USER="user"
+        -e MYSQL_PASSWORD="password"
         -e MYSQL_RANDOM_ROOT_PASSWORD='true'
         mariadb
-      - docker run --rm --network ${NETWORK} docker sh -c "while ! nc -z ${MYSQL_HOST} 3306; do sleep 1; done"
+      - docker run --rm --network DRONE___PROJECT___${DRONE_BUILD_NUMBER} docker sh -c "while ! nc -z DRONE___PROJECT___${DRONE_BUILD_NUMBER} 3306; do sleep 1; done"
       - >-
-        (docker run --rm --network ${NETWORK}
+        (docker run --rm --network DRONE___PROJECT___${DRONE_BUILD_NUMBER}
         -e SYMFONY_ENV=test
-        -e database_host=${MYSQL_HOST}
-        -e database_user=${MYSQL_USER}
-        -e database_password=${MYSQL_PASSWORD}
-        ${IMAGE}:$$BUILD_NUMBER); local result=$?;
-      - docker rm -f ${MYSQL_HOST}
-      - docker network rm ${NETWORK}
+        -e DATABASE_HOST=DRONE___PROJECT___${DRONE_BUILD_NUMBER}
+        -e DATABASE_USER="user"
+        -e DATABASE_PASSWORD="password"
+        __IMAGE__:${DRONE_BUILD_NUMBER}); local result=$?;
+      - docker rm -f DRONE___PROJECT___${DRONE_BUILD_NUMBER}
+      - docker network rm DRONE___PROJECT___${DRONE_BUILD_NUMBER}
       - >+
         if [ "$result" == 0 ]; then
-          docker login --username ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD} ${REGISTRY_HOST}
-          docker push ${IMAGE}:$$BUILD_NUMBER > /dev/null
-          docker rmi --force `docker images -q --filter "before=${IMAGE}:$$BUILD_NUMBER" ${IMAGE}` || true
+          mkdir ~/.docker
+          echo ${DOCKER_CONFIG_JSON} > ~/.docker/config.json
+          docker push __IMAGE__:${DRONE_BUILD_NUMBER} > /dev/null
+          docker rmi --force `docker images -q --filter "before=__IMAGE__:${DRONE_BUILD_NUMBER}" __IMAGE__` || true
         else
-          docker rmi --force ${IMAGE}:$$BUILD_NUMBER
+          docker rmi --force __IMAGE__:${DRONE_BUILD_NUMBER}
         fi
       - exit "$result"
-    environment:
-      NETWORK: drone_network_$$REGISTRY_REPO_$$BUILD_NUMBER
-      MYSQL_HOST: drone_mysql_$$REGISTRY_REPO_$$BUILD_NUMBER
-      MYSQL_DB: db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      IMAGE: $$REGISTRY_HOST/$$REGISTRY_REPO
-      REGISTRY_HOST: $$REGISTRY_HOST
-      REGISTRY_USERNAME: $$REGISTRY_USERNAME
-      REGISTRY_PASSWORD: $$REGISTRY_PASSWORD
 
-deploy:
-    ssh:
-      host: $$SWARM_HOST
-      user: $$SWARM_USER
-      port: 22
-      commands:
-        - docker pull $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER
-        - docker service update --image $$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER $$SWARM_SERVICE
-        - docker rmi `docker images -q --filter "before=$$REGISTRY_HOST/$$REGISTRY_REPO:$$BUILD_NUMBER" $$REGISTRY_HOST/$$REGISTRY_REPO` 2> /dev/null || true
-      when:
-          branch: master
+  deploy:
+    image: plugins/ssh
+    host:
+      - __SSH_HOST__
+    user: __SSH_USER__
+    port: 22
+    script:
+      - docker pull __IMAGE__:${DRONE_BUILD_NUMBER} > /dev/null
+      - docker service update --image __IMAGE__:${DRONE_BUILD_NUMBER} __SERVICE__
+      - docker rmi `docker images -q --filter "before=__IMAGE__:${DRONE_BUILD_NUMBER}" __IMAGE__` 2> /dev/null || true
+    when:
+      branch: master
 
-notify:
-    slack:
-      webhook_url: $$SLACK_WEBHOOK_URL
-      channel: drone
-      username: drone
+  notify:
+    image: plugins/slack
+    channel: drone
+    username: drone
+
+# Values to replace: __IMAGE__ __PROJECT__ __SERVICE__ __SSH_HOST__ __SSH_USER__
+# drone secret add --image docker __REPO__ DOCKER_CONFIG_JSON '{"auths": {"registry.docker.com": {"auth": "__TOKEN__"}}}'
+# drone secret add --image plugins/ssh __REPO__ SSH_KEY @/home/root/.ssh/id_rsa
+# drone secret add --image plugins/slack __REPO__ SLACK_WEBHOOK __SLACK_URL
