@@ -17,6 +17,7 @@ pipeline:
       - >-
         (docker run --rm --network DRONE___PROJECT___${DRONE_BUILD_NUMBER}
         -e SYMFONY_ENV=test
+        -e SYMFONY_DEBUG=false
         -e DATABASE_HOST=DRONE___PROJECT___${DRONE_BUILD_NUMBER}
         -e DATABASE_USER="user"
         -e DATABASE_PASSWORD="password"
