@@ -42,7 +42,6 @@ pipeline:
     user: __SSH_USER__
     port: 22
     script:
-      - docker pull __IMAGE__:${DRONE_BUILD_NUMBER} > /dev/null
       - docker service update --image __IMAGE__:${DRONE_BUILD_NUMBER} __SERVICE__
       - docker rmi `docker images -q --filter "before=__IMAGE__:${DRONE_BUILD_NUMBER}" __IMAGE__` 2> /dev/null || true
     when:
