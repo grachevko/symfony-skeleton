@@ -5,7 +5,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 $loader = require dirname(__DIR__).'/app/autoload.php';
 
-if ($debug = filter_var($debug, FILTER_VALIDATE_BOOLEAN)) {
+if ($debug = filter_var(getenv('SYMFONY_DEBUG'), FILTER_VALIDATE_BOOLEAN)) {
     Debug::enable();
 } else {
     include dirname(__DIR__).'/var/bootstrap.php.cache';
