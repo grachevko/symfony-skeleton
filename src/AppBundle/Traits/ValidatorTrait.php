@@ -28,6 +28,7 @@ trait ValidatorTrait
      * @param null $constraints
      * @param null $groups
      *
+     * @throws \RuntimeException
      * @throws ValidatorException
      */
     protected function validateThenThrow($value, $constraints = null, $groups = null)

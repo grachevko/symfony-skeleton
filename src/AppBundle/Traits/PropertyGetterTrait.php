@@ -11,6 +11,8 @@ trait PropertyGetterTrait
      * @param $name
      *
      * @return mixed
+     *
+     * @throws \InvalidArgumentException
      */
     public function __get($name)
     {
