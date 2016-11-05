@@ -11,7 +11,7 @@ services:
           - ./:/usr/local/app
       environment:
           SYMFONY_ENV: dev
-          SYMFONY_DEBUG: 'true'
+          SYMFONY_DEBUG: 1
           DATABASE_HOST: mysql
           DATABASE_USER: db
           DATABASE_PASSWORD: db

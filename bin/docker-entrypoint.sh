@@ -12,15 +12,15 @@ case $SYMFONY_ENV in
 esac
 
 case $SYMFONY_DEBUG in
-   true|false)
+   1|0)
 	;;
    *)
-	>&2 echo env "SYMFONY_DEBUG" must in \"true, false\"
+	>&2 echo env "SYMFONY_DEBUG" must in \"1, 0\"
 	exit 1
 	;;
 esac
 
-if [ "$SYMFONY_ENV" == "dev" ] || { [ "$SYMFONY_ENV" == "sandbox" ] && [ "$SYMFONY_DEBUG" = true ] ;}; then
+if [ "$SYMFONY_ENV" == "dev" ] || { [ "$SYMFONY_ENV" == "sandbox" ] && [ "$SYMFONY_DEBUG" = 1 ] ;}; then
     COMPOSER_EXEC=${COMPOSER_EXEC:="composer install --no-interaction --optimize-autoloader --prefer-source"}
     XDEBUG=${XDEBUG:=true}
 
