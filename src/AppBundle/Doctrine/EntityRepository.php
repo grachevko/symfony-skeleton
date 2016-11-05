@@ -80,14 +80,20 @@ abstract class EntityRepository
      */
     public function save($entity)
     {
-        $class = $this->getClass();
-
-        if (!$entity instanceof $class) {
-            throw new InvalidArgumentException();
-        }
+        $this->validate($entity);
 
         $this->em->persist($entity);
         $this->em->flush($entity);
+    }
+
+    /**
+     * @param $entity
+     */
+    public function detach($entity)
+    {
+        $this->validate($entity);
+
+        $this->em->detach($entity);
     }
 
     /**
@@ -132,5 +138,19 @@ abstract class EntityRepository
         }
 
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @param $entity
+     * @param $class
+     *
+     * @throws InvalidArgumentException
+     */
+    protected function validate($entity): void
+    {
+        $class = $this->getClass();
+        if (!$entity instanceof $class) {
+            throw new InvalidArgumentException(sprintf('Only entity of "%s" available to use in this repository', $class));
+        }
     }
 }
