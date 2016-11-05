@@ -7,12 +7,11 @@ services:
           args:
              SOURCE_DIR: ./var/null
       hostname: $SERVICE.local
-      command: bin/console server:run 0.0.0.0:80
       volumes:
           - ./:/usr/local/app
       environment:
           SYMFONY_ENV: dev
-          PHP_IDE_CONFIG: "serverName=$SERVICE"
+          SYMFONY_DEBUG: 'true'
           DATABASE_HOST: mysql
           DATABASE_USER: db
           DATABASE_PASSWORD: db
