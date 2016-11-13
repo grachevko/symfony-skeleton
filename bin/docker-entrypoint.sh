@@ -21,7 +21,7 @@ case $SYMFONY_DEBUG in
 esac
 
 if [ "$SYMFONY_ENV" == "dev" ]; then
-    COMPOSER_EXEC=${COMPOSER_EXEC:="composer install --no-interaction --optimize-autoloader --prefer-source"}
+    COMPOSER_EXEC=${COMPOSER_EXEC:="composer install --no-interaction --optimize-autoloader --prefer-dist --verbose --profile"}
     XDEBUG=${XDEBUG:=true}
 
     COMMAND=${COMMAND:='bin/console server:run 0.0.0.0:80 --router="vendor/symfony/symfony/src/Symfony/Bundle/FrameworkBundle/Resources/config/router_prod.php"'}
