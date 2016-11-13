@@ -30,10 +30,8 @@ elif [ "$SYMFONY_ENV" == "prod" ]; then
     COMPOSER_EXEC=${COMPOSER_EXEC:="composer install --no-dev --no-interaction --optimize-autoloader --no-progress --prefer-dist"}
 
     rm -rf ${APP_DIR}/web/config.php
-    cp ${APP_DIR}/app/config/apache.conf ${APACHE_CONFDIR}/sites-enabled/000-default.conf
 
-    a2enmod rewrite
-    COMMAND=${COMMAND:=apache2-foreground}
+    COMMAND=${COMMAND:=apache2-entrypoint.sh}
 
 elif [ "$SYMFONY_ENV" == "test" ]; then
 	COMPOSER_EXEC=${COMPOSER_EXEC:="composer install --no-interaction --optimize-autoloader --no-progress --prefer-dist"}
@@ -100,7 +98,5 @@ if [ "$XDEBUG" == "true" ]; then
     docker-php-ext-enable xdebug
     echo -e '\n> xdebug enabled\n'
 fi
-
-chown -R www-data:www-data ${APP_DIR}/var
 
 /bin/sh -c "${COMMAND}"
