@@ -3,10 +3,10 @@
 set -e
 
 case $SYMFONY_ENV in
-   prod|dev|test|sandbox)
+   prod|dev|test)
 	;;
    *)
-	>&2 echo env "SYMFONY_ENV" must be in \"prod, dev, test, sandbox\"
+	>&2 echo env "SYMFONY_ENV" must be in \"prod, dev, test\"
 	exit 1
 	;;
 esac
@@ -20,13 +20,13 @@ case $SYMFONY_DEBUG in
 	;;
 esac
 
-if [ "$SYMFONY_ENV" == "dev" ] || { [ "$SYMFONY_ENV" == "sandbox" ] && [ "$SYMFONY_DEBUG" = 1 ] ;}; then
+if [ "$SYMFONY_ENV" == "dev" ]; then
     COMPOSER_EXEC=${COMPOSER_EXEC:="composer install --no-interaction --optimize-autoloader --prefer-source"}
     XDEBUG=${XDEBUG:=true}
 
     COMMAND=${COMMAND:='bin/console server:run 0.0.0.0:80 --router="vendor/symfony/symfony/src/Symfony/Bundle/FrameworkBundle/Resources/config/router_prod.php"'}
 
-elif [ "$SYMFONY_ENV" == "prod" ] || [ "$SYMFONY_ENV" == "sandbox" ]; then
+elif [ "$SYMFONY_ENV" == "prod" ]; then
     COMPOSER_EXEC=${COMPOSER_EXEC:="composer install --no-dev --no-interaction --optimize-autoloader --no-progress --prefer-dist"}
 
     rm -rf ${APP_DIR}/web/config.php
