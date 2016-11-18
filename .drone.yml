@@ -1,3 +1,10 @@
+services:
+  database:
+    image: mariadb
+    environment:
+      MYSQL_DATABASE: db
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
+
 pipeline:
   build:
     image: docker
@@ -5,35 +12,35 @@ pipeline:
       - /var/run/docker.sock:/var/run/docker.sock
     commands:
       - docker build -t __IMAGE__:${DRONE_BUILD_NUMBER} .
-      - docker network create DRONE___PROJECT___${DRONE_BUILD_NUMBER}
+      - while ! nc -z 127.0.0.1 3306; do sleep 1; done
       - >-
-        docker run -d --name DRONE___PROJECT___${DRONE_BUILD_NUMBER} --network DRONE___PROJECT___${DRONE_BUILD_NUMBER}
-        -e MYSQL_DATABASE="db"
-        -e MYSQL_USER="user"
-        -e MYSQL_PASSWORD="password"
-        -e MYSQL_RANDOM_ROOT_PASSWORD='true'
-        mariadb
-      - docker run --rm --network DRONE___PROJECT___${DRONE_BUILD_NUMBER} docker sh -c "while ! nc -z DRONE___PROJECT___${DRONE_BUILD_NUMBER} 3306; do sleep 1; done"
-      - >-
-        (docker run --rm --network DRONE___PROJECT___${DRONE_BUILD_NUMBER}
+        (docker run --rm --network "container:$HOSTNAME"
         -e SYMFONY_ENV=test
         -e SYMFONY_DEBUG=0
-        -e DATABASE_HOST=DRONE___PROJECT___${DRONE_BUILD_NUMBER}
-        -e DATABASE_USER="user"
-        -e DATABASE_PASSWORD="password"
         __IMAGE__:${DRONE_BUILD_NUMBER}); local result=$?;
-      - docker rm -f DRONE___PROJECT___${DRONE_BUILD_NUMBER}
-      - docker network rm DRONE___PROJECT___${DRONE_BUILD_NUMBER}
       - >+
         if [ "$result" == 0 ]; then
-          mkdir ~/.docker
-          echo ${DOCKER_CONFIG_JSON} > ~/.docker/config.json
+          docker login -u"$HUB_LOGIN" -p"$HUB_PASSWORD" registry.gitlab.com
           docker push __IMAGE__:${DRONE_BUILD_NUMBER} > /dev/null
           docker rmi --force `docker images -q --filter "before=__IMAGE__:${DRONE_BUILD_NUMBER}" __IMAGE__` || true
         else
           docker rmi --force __IMAGE__:${DRONE_BUILD_NUMBER}
         fi
       - exit "$result"
+
+  deploy:
+    image: plugins/ssh
+    host:
+      - s2.automagistre.ru
+      - s1.grachevko.ru
+    user: premier
+    port: 22
+    script:
+      - docker service update --image __IMAGE__:${DRONE_BUILD_NUMBER} astra50_app
+      - docker rmi `docker images -q --filter "before=__IMAGE__:${DRONE_BUILD_NUMBER}" __IMAGE__` 2> /dev/null || true
+    when:
+      branch: master
+
 
   deploy:
     image: plugins/ssh
@@ -52,7 +59,7 @@ pipeline:
     channel: drone
     username: drone
 
-# Values to replace: __IMAGE__ __PROJECT__ __SERVICE__ __SSH_HOST__ __SSH_USER__
-# drone secret add --image docker __REPO__ DOCKER_CONFIG_JSON '{"auths": {"registry.docker.com": {"auth": "__TOKEN__"}}}'
+# Values to replace: __IMAGE__ __SERVICE__ __SSH_HOST__ __SSH_USER__
+# drone secret add --image plugins/ssh __REPO__ SSH_KEY @/home/root/.ssh/id_rsa
 # drone secret add --image plugins/ssh __REPO__ SSH_KEY @/home/root/.ssh/id_rsa
 # drone secret add --image plugins/slack __REPO__ SLACK_WEBHOOK __SLACK_URL
