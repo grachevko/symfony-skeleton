@@ -31,14 +31,14 @@ elif [ "$SYMFONY_ENV" == "prod" ]; then
 
     rm -rf ${APP_DIR}/web/config.php
 
-    COMMAND=${COMMAND:=apache2-entrypoint.sh}
+    COMMAND=${COMMAND:=start-apache2.sh}
 
 elif [ "$SYMFONY_ENV" == "test" ]; then
 	COMPOSER_EXEC=${COMPOSER_EXEC:="composer install --no-interaction --optimize-autoloader --no-progress --prefer-dist"}
 	REQUIREMENTS=${REQUIREMENTS:=true}
 	FIXTURES=${FIXTURES:=true}
 
-	COMMAND=${COMMAND:="php-cs-fixer fix --dry-run --level symfony ./src/ && bin/console doctrine:schema:validate && phpunit"}
+	COMMAND=${COMMAND:=start-test.sh}
 fi
 
 OPCACHE=${OPCACHE:=true}
@@ -72,10 +72,6 @@ fi
 
 if [ "$COMPOSER_EXEC" != "false" ]; then
     ${COMPOSER_EXEC}
-fi
-
-if [ "$REQUIREMENTS" == "true" ]; then
-    bin/symfony_requirements
 fi
 
 if [ "$MIGRATION" == "true" ]; then
