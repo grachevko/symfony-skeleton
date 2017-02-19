@@ -3,36 +3,51 @@
 namespace AppBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @author Konstantin Grachev <me@grachevko.ru>
  */
-abstract class BaseController extends Controller
+abstract class BaseController extends Controller implements TranslatorInterface, NormalizerInterface
 {
-    /**
-     * @param $id
-     *
-     * @return string
-     */
-    protected function trans($id, array $parameters = [], $domain = null, $locale = null)
+    public function trans($id, array $parameters = [], $domain = null, $locale = null): string
     {
-        return $this->container->get('translator')->trans($id, $parameters, $domain, $locale);
+        return $this->getTranslator()->trans($id, $parameters, $domain, $locale);
     }
 
-    /**
-     * @param       $data
-     * @param null  $format
-     * @param array $context
-     *
-     * @return mixed
-     */
-    protected function normalize($data, $format = null, array $context = [])
+    public function transChoice($id, $number, array $parameters = [], $domain = null, $locale = null): string
+    {
+        return $this->getTranslator()->transChoice($id, $number, $parameters, $domain, $locale);
+    }
+
+    public function setLocale($locale): void
+    {
+        $this->getTranslator()->setLocale($locale);
+    }
+
+    public function getLocale(): string
+    {
+        return $this->getTranslator()->getLocale();
+    }
+
+    private function getTranslator(): TranslatorInterface
+    {
+        return $this->container->get('translator');
+    }
+
+    public function normalize($data, $format = null, array $context = [])
     {
         return $this->container->get('serializer')->normalize($data, $format, $context);
     }
 
+    public function supportsNormalization($data, $format = null)
+    {
+        return true;
+    }
+
     /**
-     * @deprecated
+     * @deprecated Don't use controller as service locator
      */
     public function get($id)
     {

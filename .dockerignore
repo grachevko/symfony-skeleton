@@ -1,8 +1,11 @@
+# Symfony
 var/cache/*
 var/logs/*
 var/sessions/*
-var/bootstrap.php.cache
+web/bundles
 
-Dockerfile
-Dockerfile_dev
-app/config/parameters.yml
+# Composer
+vendor
+
+# git
+.git

@@ -4,6 +4,7 @@ namespace AppBundle\Doctrine;
 
 use AppBundle\Exception\InvalidArgumentException;
 use Doctrine\ORM\EntityNotFoundException;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Pagerfanta\Adapter\DoctrineORMAdapter;
 use Pagerfanta\Pagerfanta;
@@ -109,35 +110,19 @@ abstract class EntityRepository
     }
 
     /**
-     * @param QueryBuilder $qb
-     * @param int          $pageSize
-     * @param int          $pageIndex
+     * @param Query $query
+     * @param int   $pageSize
+     * @param int   $page
      *
      * @return Pagerfanta
      */
-    protected function paginate(QueryBuilder $qb, int $pageSize, int $pageIndex): Pagerfanta
+    protected function createPaginator(Query $query, int $pageSize, int $page): Pagerfanta
     {
-        return (new Pagerfanta(new DoctrineORMAdapter($qb)))
-            ->setMaxPerPage($pageSize)
-            ->setCurrentPage($pageIndex);
-    }
+        $paginator = new Pagerfanta(new DoctrineORMAdapter($query, false));
+        $paginator->setMaxPerPage($pageSize);
+        $paginator->setCurrentPage($page);
 
-    /**
-     * @param       $displayField
-     * @param array $orderBy
-     *
-     * @return array
-     */
-    public function findAllForChoices($displayField, array $orderBy = [])
-    {
-        $qb = $this->createQueryBuilder('e')
-            ->select('e.id', 'e.'.$displayField);
-
-        foreach ($orderBy as $key => $value) {
-            $qb->addOrderBy('e.'.$key, $value);
-        }
-
-        return $qb->getQuery()->getResult();
+        return $paginator;
     }
 
     /**
