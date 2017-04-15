@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -32,23 +32,30 @@ if [ -z "$SYMFONY_ENV" ]; then export SYMFONY_ENV=${APP_ENV}; fi
 if [ -z "$SYMFONY_DEBUG" ]; then export SYMFONY_DEBUG=${APP_DEBUG}; fi
 
 COMMAND="$@"
-COMPOSER_DEFAULT_EXEC=${COMPOSER_DEFAULT_EXEC:="composer install --no-interaction --prefer-dist --no-scripts"}
 
 if [ "$APP_ENV" == "dev" ]; then
-    COMPOSER_EXEC=${COMPOSER_EXEC:="$COMPOSER_DEFAULT_EXEC --optimize-autoloader --verbose --profile"}
-
     XDEBUG=${XDEBUG:=true}
     OPCACHE=${OPCACHE:=false}
     APCU=${APCU:=false}
 
 elif [ "$APP_ENV" == "test" ]; then
-    COMPOSER_EXEC=${COMPOSER_EXEC:="$COMPOSER_DEFAULT_EXEC --apcu-autoloader --no-progress"}
-
 	REQUIREMENTS=${REQUIREMENTS:=true}
-	FIXTURES=${FIXTURES:=true}
+#	FIXTURES=${FIXTURES:=true}
 
-elif [ "$APP_ENV" == "prod" ]; then
-    COMPOSER_EXEC=${COMPOSER_EXEC:=false}
+    cd "$APP_DIR"
+
+	# Set variable from .env.dist if not defined
+	OLD_IFS="$IFS"
+	IFS='='
+	while read env_name env_value
+	do
+	    if [ -z "$env_name" ]; then continue; fi
+
+	    IFS=
+	    eval `echo export ${env_name}=\$\{${env_name}\:=${env_value}\}`
+	    IFS='='
+	done < ./.env.dist
+	IFS="$OLD_IFS"
 fi
 
 COMMAND=${COMMAND:=apache}
@@ -71,7 +78,7 @@ if [ "$APCU" == "true" ]; then
     enableExt apcu
 fi
 
-if [ "$COMPOSER_EXEC" != "false" ]; then
+if [ ! -z "$COMPOSER_EXEC" ]; then
     ${COMPOSER_EXEC}
 fi
 
