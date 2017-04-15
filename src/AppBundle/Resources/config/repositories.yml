@@ -1,5 +1,0 @@
-services:
-    app.doctrine.entity_repository:
-        class: AppBundle\Doctrine\EntityRepository
-        calls:
-            - ['setEntityManager', ['@doctrine.orm.entity_manager']]

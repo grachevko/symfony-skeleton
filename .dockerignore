@@ -9,3 +9,9 @@ vendor
 
 # git
 .git
+
+# Dev tools
+docker-compose.yml.dist
+Makefile
+bin/drone.sh
+.drone.*

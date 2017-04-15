@@ -1,4 +1,4 @@
-FROM php:7.1.1-apache
+FROM php:7.1.3-apache
 
 LABEL MAINTAINER="Konstantin Grachev <me@grachevko.ru>"
 
@@ -21,6 +21,7 @@ RUN set -ex \
         git \
         openssh-client \
         zlib1g-dev \
+        netcat \
     && apt-get install -y --no-install-recommends -t testing libicu-dev \
     && docker-php-ext-install zip intl pdo_mysql iconv opcache \
     && rm -rf ${PHP_INI_DIR}/conf.d/docker-php-ext-opcache.ini \
@@ -38,12 +39,13 @@ ARG SOURCE_DIR=.
 
 COPY $SOURCE_DIR/composer.* ${APP_DIR}/
 RUN if [ -f composer.json ]; then \
-    composer install --no-scripts --no-interaction --no-autoloader --no-progress --prefer-dist \
+    composer install --no-scripts --no-interaction --apcu-autoloader --no-progress --prefer-dist \
     && rm -rf ${COMPOSER_CACHE_DIR}/* ; fi
 
 COPY $SOURCE_DIR/ ${APP_DIR}/
 COPY docker/docker-entrypoint.sh /docker-entrypoint.sh
 
+COPY docker/apache/apache.conf ${APACHE_CONFDIR}/sites-enabled/000-default.conf
 COPY docker/php/* ${PHP_INI_DIR}/
 COPY docker/bin/* /usr/local/bin/
 

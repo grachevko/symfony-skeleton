@@ -1,0 +1,31 @@
+parameters:
+    locale: ru
+
+services:
+    _defaults:
+        public: false
+        autowire: by_id
+
+    _instanceof:
+        Symfony\Bundle\FrameworkBundle\Controller\Controller:
+            public: true
+
+        Symfony\Component\EventDispatcher\EventSubscriberInterface:
+            tags: [ kernel.event_subscriber ]
+
+        Symfony\Component\Form\AbstractType:
+            tags: [ form.type ]
+
+        Twig_Extension:
+            tags: [ twig.extension ]
+
+        App\Kernel:
+            autowire: false
+
+    App\:
+        resource: ../src
+
+    Symfony\Component\PropertyAccess\PropertyAccessorInterface:
+        alias: property_accessor
+    Doctrine\ORM\EntityManager:
+        alias: doctrine.orm.default_entity_manager

@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
   app:
@@ -7,10 +7,10 @@ services:
           dockerfile: docker/Dockerfile
           args:
              SOURCE_DIR: ./var/null
-      container_name: __SERVICE__
-      hostname: __SERVICE__.local
+      container_name: symfony
+      hostname: symfony.local
       labels:
-        subdomains: __SUBDOMAIN__
+        subdomains: api
       volumes:
           - ./:/usr/local/app
       environment:
@@ -20,13 +20,14 @@ services:
           DATABASE_PORT: 3306
           DATABASE_USER: db
           DATABASE_PASSWORD: db
+          SECRET: ThisIsNotSecureSecretVariable
       depends_on:
           - mysql
 
   mysql:
-      image: mariadb
-      hostname: mysql.__SERVICE__.local
-      container_name: __SERVICE___mysql
+      image: mariadb:10
+      hostname: mysql.symfony.local
+      container_name: symfony_mysql
       volumes:
           - mysql-db:/var/lib/mysql
       environment:

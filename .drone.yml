@@ -1,65 +1,117 @@
-services:
-  database:
-    image: mariadb
-    environment:
-      MYSQL_DATABASE: db
-      MYSQL_ALLOW_EMPTY_PASSWORD: true
-
 pipeline:
+  clone:
+    image: plugins/git
+    depth: 2
+
+  security checking:
+    image: alpine
+    commands:
+      - echo -e "$MD5_LIST" | md5sum -wc
+
+  coding style:
+    image: grachev/php-cs-fixer
+    commands:
+      - >-
+        php-cs-fixer fix
+        --config=.php_cs.dist
+        --verbose
+        --dry-run
+        --using-cache=no
+        --path-mode=intersection
+        `git diff --name-only --diff-filter=ACMRTUXB HEAD^`
+
   build:
     image: docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     commands:
-      - docker build -t __IMAGE__:${DRONE_BUILD_NUMBER} .
-      - while ! nc -z 127.0.0.1 3306; do sleep 1; done
       - >-
-        (docker run --rm --network "container:$HOSTNAME"
-        -e SYMFONY_ENV=test
-        -e SYMFONY_DEBUG=0
-        __IMAGE__:${DRONE_BUILD_NUMBER}); local result=$?;
+        docker build -t "${DRONE_REPO_NAME}:${DRONE_BUILD_NUMBER}"
+        --file docker/Dockerfile
+        --label branch="${DRONE_COMMIT_BRANCH}"
+        --build-arg GITHUB_AUTH_TOKEN="$GITHUB_AUTH_TOKEN" .
+
+  phpstan:
+    image: ${DRONE_REPO_NAME}:${DRONE_BUILD_NUMBER}
+    commands:
+      - cd "$APP_DIR"
+      - phpstan analyse --level 5 --configuration phpstan.neon --no-progress src tests
+
+  symfony requirements:
+    image: ${DRONE_REPO_NAME}:${DRONE_BUILD_NUMBER}
+    commands:
+      - symfony_requirements
+
+  yaml lint:
+    image: ${DRONE_REPO_NAME}:${DRONE_BUILD_NUMBER}
+    commands:
+      - cd "$APP_DIR"
+      - eval $(cat .env.dist | sed "s/^/export /")
+      - console lint:yaml etc
+
+  doctrine validation:
+    image: ${DRONE_REPO_NAME}:${DRONE_BUILD_NUMBER}
+    commands:
+      - cd "$APP_DIR"
+      - eval $(cat .env.dist | sed "s/^/export /")
+      - while ! nc -z 127.0.0.1 3306; do sleep 1; done
+      - console doctrine:schema:validate --skip-sync
+
+  phpunit:
+    image: ${DRONE_REPO_NAME}:${DRONE_BUILD_NUMBER}
+    commands:
+      - cd "$APP_DIR"
+      - eval $(cat .env.dist | sed "s/^/export /")
+      - phpunit
+
+  publish:
+    image: docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    commands:
+      - docker login -u"$HUB_LOGIN" -p"$HUB_PASSWORD" registry.gitlab.com
+      - docker tag "${DRONE_REPO_NAME}:${DRONE_BUILD_NUMBER}" "registry.gitlab.com/${DRONE_REPO}:${DRONE_BUILD_NUMBER}"
+      - docker push "registry.gitlab.com/${DRONE_REPO}:${DRONE_BUILD_NUMBER}" > /dev/null
       - >+
-        if [ "$result" == 0 ]; then
-          docker login -u"$HUB_LOGIN" -p"$HUB_PASSWORD" registry.gitlab.com
-          docker push __IMAGE__:${DRONE_BUILD_NUMBER} > /dev/null
-          docker rmi --force `docker images -q --filter "before=__IMAGE__:${DRONE_BUILD_NUMBER}" __IMAGE__` || true
-        else
-          docker rmi --force __IMAGE__:${DRONE_BUILD_NUMBER}
+        if [ "master" == "$DRONE_COMMIT_BRANCH" ]; then
+          docker rmi --force "registry.gitlab.com/${DRONE_REPO}:${DRONE_BUILD_NUMBER}"
+
+          docker tag "${DRONE_REPO_NAME}:${DRONE_BUILD_NUMBER}" "registry.gitlab.com/${DRONE_REPO}:latest"
+          docker push "registry.gitlab.com/${DRONE_REPO}:latest" > /dev/null
         fi
-      - exit "$result"
+    when:
+      event: push
+
+  clean:
+    image: docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    commands:
+      - >+
+        if [ "success" == "$DRONE_BUILD_STATUS" ] && [ "push" == "$DRONE_BUILD_EVENT" ]; then
+          (docker rmi `docker images -q --filter before="${DRONE_REPO_NAME}:${DRONE_BUILD_NUMBER}" --filter label="branch=$DRONE_COMMIT_BRANCH" "$IMAGE"`)
+        fi
+      - docker rmi --force "${DRONE_REPO_NAME}:${DRONE_BUILD_NUMBER}"
+    when:
+      status: [ failure, success ]
 
   deploy:
-    image: plugins/ssh
-    host:
-      - s2.automagistre.ru
-      - s1.grachevko.ru
-    user: premier
-    port: 22
+    image: appleboy/drone-ssh
+    host: ${DEPLOY_HOST}
+    username: ${DEPLOY_USER}
+    key: ${DEPLOY_KEY}
     script:
-      - docker service update --image __IMAGE__:${DRONE_BUILD_NUMBER} astra50_app
-      - docker rmi `docker images -q --filter "before=__IMAGE__:${DRONE_BUILD_NUMBER}" __IMAGE__` 2> /dev/null || true
+      - docker service update --image "registry.gitlab.com/${DRONE_REPO}:${DRONE_BUILD_NUMBER}" "${DEPLOY_SERVICE}"
+      - >-
+        docker rmi
+        `docker images -q --filter "before=registry.gitlab.com/${DRONE_REPO}:${DRONE_BUILD_NUMBER}" "registry.gitlab.com/${DRONE_REPO}"`
+        2> /dev/null || true
     when:
       branch: master
 
-
-  deploy:
-    image: plugins/ssh
-    host:
-      - __SSH_HOST__
-    user: __SSH_USER__
-    port: 22
-    script:
-      - docker service update --image __IMAGE__:${DRONE_BUILD_NUMBER} __SERVICE__
-      - docker rmi `docker images -q --filter "before=__IMAGE__:${DRONE_BUILD_NUMBER}" __IMAGE__` 2> /dev/null || true
-    when:
-      branch: master
-
-  notify:
-    image: plugins/slack
-    channel: drone
-    username: drone
-
-# Values to replace: __IMAGE__ __SERVICE__ __SSH_HOST__ __SSH_USER__
-# drone secret add --image plugins/ssh __REPO__ SSH_KEY @/home/root/.ssh/id_rsa
-# drone secret add --image plugins/ssh __REPO__ SSH_KEY @/home/root/.ssh/id_rsa
-# drone secret add --image plugins/slack __REPO__ SLACK_WEBHOOK __SLACK_URL
+services:
+  mysql:
+    image: mariadb
+    environment:
+      MYSQL_DATABASE: symfony
+      MYSQL_ALLOW_EMPTY_PASSWORD: true

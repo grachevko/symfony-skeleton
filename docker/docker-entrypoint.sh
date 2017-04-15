@@ -5,11 +5,17 @@ set -e
 export DOCKER_BRIDGE_IP=$(/sbin/ip route|awk '/default/ { print $3 }')
 
 if [ ! -z "$GITHUB_AUTH_TOKEN" ]; then
-    composer config -g github-oauth.github.com ${GITHUB_AUTH_TOKEN}
+    echo "machine github.com login ${GITHUB_AUTH_TOKEN}" > ~/.netrc
 fi
 
-# Skip entrypoint if first argument exist in $PATH
-if which "$1" > /dev/null; then exec "$@" && exit 0; fi
+# Skip entrypoint for following commands
+case "$1" in
+   sh|php|composer) exec "$@" && exit 0;;
+esac
+
+if [ ! -z "$SKIP_ENTRYPOINT" ]; then
+    exec "$@" && exit 0
+fi
 
 case "$APP_ENV" in
    prod|dev|test) ;;
@@ -26,7 +32,7 @@ if [ -z "$SYMFONY_ENV" ]; then export SYMFONY_ENV=${APP_ENV}; fi
 if [ -z "$SYMFONY_DEBUG" ]; then export SYMFONY_DEBUG=${APP_DEBUG}; fi
 
 COMMAND="$@"
-COMPOSER_DEFAULT_EXEC=${COMPOSER_DEFAULT_EXEC:="composer install --no-interaction --prefer-dist"}
+COMPOSER_DEFAULT_EXEC=${COMPOSER_DEFAULT_EXEC:="composer install --no-interaction --prefer-dist --no-scripts"}
 
 if [ "$APP_ENV" == "dev" ]; then
     COMPOSER_EXEC=${COMPOSER_EXEC:="$COMPOSER_DEFAULT_EXEC --optimize-autoloader --verbose --profile"}
@@ -35,25 +41,21 @@ if [ "$APP_ENV" == "dev" ]; then
     OPCACHE=${OPCACHE:=false}
     APCU=${APCU:=false}
 
-    COMMAND=${COMMAND:=php-server}
-
 elif [ "$APP_ENV" == "test" ]; then
     COMPOSER_EXEC=${COMPOSER_EXEC:="$COMPOSER_DEFAULT_EXEC --apcu-autoloader --no-progress"}
 
 	REQUIREMENTS=${REQUIREMENTS:=true}
 	FIXTURES=${FIXTURES:=true}
 
-	COMMAND=${COMMAND:=run-test}
-
 elif [ "$APP_ENV" == "prod" ]; then
-    COMPOSER_EXEC=${COMPOSER_EXEC:="$COMPOSER_DEFAULT_EXEC --no-dev --apcu-autoloader --no-progress"}
-
-    COMMAND=${COMMAND:=apache}
+    COMPOSER_EXEC=${COMPOSER_EXEC:=false}
 fi
 
+COMMAND=${COMMAND:=apache}
 OPCACHE=${OPCACHE:=true}
 APCU=${APCU:=true}
 MIGRATION=${MIGRATION:=true}
+COMPOSER_SCRIPT=${COMPOSER_SCRIPT:="post-install-cmd"}
 
 enableExt() {
     extension=$1
@@ -68,9 +70,13 @@ fi
 if [ "$APCU" == "true" ]; then
     enableExt apcu
 fi
-env | fgrep _ENV
+
 if [ "$COMPOSER_EXEC" != "false" ]; then
     ${COMPOSER_EXEC}
+fi
+
+if [ "$COMPOSER_SCRIPT" != "false" ]; then
+    composer run-script ${COMPOSER_SCRIPT}
 fi
 
 if [ "$MIGRATION" == "true" ]; then
@@ -89,4 +95,4 @@ if [ -f ${APP_DIR}/web/config.php ]; then
 	sed -i "s~'::1',~'::1', '$DOCKER_BRIDGE_IP',~g" "$APP_DIR/web/config.php"
 fi
 
-exec "$COMMAND"
+${COMMAND}

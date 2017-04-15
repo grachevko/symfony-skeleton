@@ -1,26 +1,17 @@
-!.gitkeep
-
-# Composer
-vendor/
-
-# Cache and logs (Symfony)
-/var/bootstrap.php.cache
-/var/cache
+/phpunit.xml
+/var
 !var/cache/.gitkeep
-!var/cache/composer.null
-/var/logs
 !var/logs/.gitkeep
-/var/SymfonyRequirements.php
+/vendor
+/web/bundles/
+/web/config.php
 
-# Assets and user uploads
-web/bundles/*
-!web/bundles/.gitkeep
-
-# Symfony parameters
-app/config/parameters.yml
-
-# Docker compose
+# Docker
 /docker-compose.yml
+!/var/null/composer.null
 
-# Drone secret valiables
-/.drone.sec.yml
+# php-cs-fixer
+/.php_cs
+
+# Environments for dev
+/.env
