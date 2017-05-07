@@ -31,7 +31,6 @@ class Kernel extends SymfonyKernel
             new \Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
             new \Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             new \FOS\UserBundle\FOSUserBundle(),
-            new \App\AppBundle(),
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {
