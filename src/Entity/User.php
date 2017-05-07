@@ -20,9 +20,15 @@ class User extends BaseUser
      */
     protected $id;
 
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->id = UuidGenerator::generate();
+    }
+
     public function setEmail($email)
     {
-        $this->id = UuidGenerator::generate();
         $this->username = $email;
 
         return parent::setEmail($email);
