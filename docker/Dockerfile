@@ -11,7 +11,7 @@ ENV PATH=${APP_DIR}/bin:${APP_DIR}/vendor/bin:${PATH}
 WORKDIR ${APP_DIR}
 
 RUN set -ex \
-    && echo "deb http://httpredir.debian.org/debian/ stretch main" > /etc/apt/sources.list.d/stretch.list \
+    && echo "deb http://httpredir.debian.org/debian/ experimental main" > /etc/apt/sources.list.d/stretch.list \
     && { \
         echo 'Package: *'; \
         echo 'Pin: release a=stable'; \
@@ -22,7 +22,7 @@ RUN set -ex \
         openssh-client \
         zlib1g-dev \
         netcat \
-    && apt-get install -y --no-install-recommends -t testing libicu-dev \
+    && apt-get install -y --no-install-recommends -t experimental libicu-dev \
     && docker-php-ext-install zip intl pdo_mysql iconv opcache \
     && rm -rf ${PHP_INI_DIR}/conf.d/docker-php-ext-opcache.ini \
     && pecl install xdebug apcu \
@@ -34,6 +34,9 @@ COPY docker/composer.sh ./composer.sh
 RUN ./composer.sh --install-dir=/usr/local/bin --filename=composer \
     && composer global require "hirak/prestissimo:^0.3" \
     && rm -rf composer.sh
+
+ARG APP_VERSION=dev
+ENV APP_VERSION ${APP_VERSION}
 
 ARG SOURCE_DIR=.
 
