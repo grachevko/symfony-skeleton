@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use Ramsey\Uuid\Builder\DefaultUuidBuilder;
-use Ramsey\Uuid\Codec\OrderedTimeCodec;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidFactory;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -23,7 +19,7 @@ class Kernel extends SymfonyKernel
 
     use MicroKernelTrait;
 
-    public function registerBundles()
+    public function registerBundles(): array
     {
         $bundles = [
             new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
@@ -46,18 +42,6 @@ class Kernel extends SymfonyKernel
         }
 
         return $bundles;
-    }
-
-    public function boot()
-    {
-        parent::boot();
-
-        $uuidFactory = new UuidFactory();
-        $uuidBuilder = new DefaultUuidBuilder($uuidFactory->getNumberConverter());
-        $uuidFactory->setUuidBuilder($uuidBuilder);
-        $uuidFactory->setCodec(new OrderedTimeCodec($uuidBuilder));
-
-        Uuid::setFactory($uuidFactory);
     }
 
     public function getCacheDir(): string
