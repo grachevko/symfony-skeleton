@@ -60,28 +60,35 @@ class Kernel extends SymfonyKernel
         Uuid::setFactory($uuidFactory);
     }
 
-    public function getCacheDir()
+    public function getCacheDir(): string
     {
         return $this->getProjectDir().'/var/cache/'.$this->getEnvironment();
     }
 
-    public function getLogDir()
+    public function getLogDir(): string
     {
         return $this->getProjectDir().'/var/logs';
     }
 
-    protected function configureRoutes(RouteCollectionBuilder $routes)
+    public function getConfDir(): string
     {
-        $routingDir = $this->getProjectDir().'/etc/routing';
-
-        $routes->import($routingDir.'/*'.self::CONFIG_EXTS, '/', 'glob');
-
-        if (is_dir($routingDir.'/'.$this->getEnvironment())) {
-            $routes->import($routingDir.'/'.$this->getEnvironment().'/*'.self::CONFIG_EXTS, '/', 'glob');
-        }
+        return $this->getProjectDir().'/etc';
     }
 
-    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader)
+    protected function configureRoutes(RouteCollectionBuilder $routes): void
+    {
+        $confDir = $this->getConfDir();
+
+        if (is_dir($confDir.'/routing/')) {
+            $routes->import($confDir.'/routing/*'.self::CONFIG_EXTS, '/', 'glob');
+        }
+        if (is_dir($confDir.'/routing/'.$this->getEnvironment())) {
+            $routes->import($confDir.'/routing/'.$this->getEnvironment().'/*'.self::CONFIG_EXTS, '/', 'glob');
+        }
+        $routes->import($confDir.'/routing'.self::CONFIG_EXTS, '/', 'glob');
+    }
+
+    protected function configureContainer(ContainerBuilder $c, LoaderInterface $loader): void
     {
         $confDir = $this->getProjectDir().'/etc';
 
