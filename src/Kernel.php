@@ -19,28 +19,14 @@ class Kernel extends SymfonyKernel
 
     use MicroKernelTrait;
 
-    public function registerBundles(): array
+    public function registerBundles(): iterable
     {
-        $bundles = [
-            new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
-            new \Symfony\Bundle\SecurityBundle\SecurityBundle(),
-            new \Symfony\Bundle\TwigBundle\TwigBundle(),
-            new \Symfony\Bundle\MonologBundle\MonologBundle(),
-            new \Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle(),
-            new \Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
-            new \Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
-            new \Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
-            new \FOS\UserBundle\FOSUserBundle(),
-        ];
-
-        if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {
-            $bundles[] = new \Symfony\Bundle\DebugBundle\DebugBundle();
-            $bundles[] = new \Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
-            $bundles[] = new \Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
-            $bundles[] = new \Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
+        $contents = require dirname(__DIR__).'/etc/bundles.php';
+        foreach ((array) $contents as $class => $envs) {
+            if (isset($envs['all']) || isset($envs[$this->getEnvironment()])) {
+                yield new $class();
+            }
         }
-
-        return $bundles;
     }
 
     public function getCacheDir(): string
